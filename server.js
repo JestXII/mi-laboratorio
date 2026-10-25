@@ -102,6 +102,26 @@ app.patch("/api/tareas/:id", (req, res) => {
     tarea: tarea
   });
 });
+
+app.get("/api/db-test", async (req, res) => {
+  try {
+    const resultado = await pool.query("SELECT NOW() AS hora");
+
+    res.json({
+      conectado: true,
+      mensaje: "Conexión a PostgreSQL exitosa",
+      horaServidorBD: resultado.rows[0].hora
+    });
+  } catch (error) {
+    console.error("Error de conexión a la base de datos:", error.message);
+
+    res.status(500).json({
+      conectado: false,
+      mensaje: "No se pudo conectar a PostgreSQL"
+    });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
