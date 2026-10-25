@@ -20,8 +20,8 @@ async function loadItems() {
     .order("id", { ascending: true });
 
   if (error) {
-    console.error("Error al cargar tareas:", error.message);
-    counter.textContent = "Error al cargar las tareas";
+    console.error("Error al cargar tareas:", error);
+    counter.textContent = "Error: " + error.message;
     return;
   }
 
