@@ -27,7 +27,20 @@ app.get("/api/presentacion", (req, res) => {
     funciona: true
   });
 });
+app.post("/api/saludar", (req, res) => {
+  const nombre = req.body.nombre;
 
+  if (typeof nombre !== "string" || nombre.trim() === "") {
+    return res.status(400).json({
+      error: "Debes enviar un nombre válido"
+    });
+  }
+
+  res.json({
+    mensaje: `Hola, ${nombre.trim()}`,
+    funciona: true
+  });
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
