@@ -30,6 +30,7 @@ async function loadItems() {
   renderItems();
 }
 
+
 function renderItems() {
   list.innerHTML = "";
 
@@ -39,7 +40,6 @@ function renderItems() {
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = item.completada;
-    checkbox.disabled = false;
 
     checkbox.addEventListener("change", async function () {
       checkbox.disabled = true;
@@ -51,8 +51,7 @@ function renderItems() {
 
       if (error) {
         alert("No se pudo actualizar: " + error.message);
-        checkbox.checked = item.completada;
-        checkbox.disabled = false;
+        await loadItems();
         return;
       }
 
@@ -66,13 +65,42 @@ function renderItems() {
       texto.style.textDecoration = "line-through";
     }
 
+    const botonEliminar = document.createElement("button");
+    botonEliminar.textContent = "Eliminar";
+    botonEliminar.style.marginLeft = "10px";
+
+    botonEliminar.addEventListener("click", async function () {
+      const confirmar = confirm(
+        `¿Seguro que quieres eliminar "${item.nombre}"?`
+      );
+
+      if (!confirmar) return;
+
+      botonEliminar.disabled = true;
+
+      const { error } = await supabaseClient
+        .from("tareas")
+        .delete()
+        .eq("id", item.id);
+
+      if (error) {
+        alert("No se pudo eliminar: " + error.message);
+        botonEliminar.disabled = false;
+        return;
+      }
+
+      await loadItems();
+    });
+
     li.appendChild(checkbox);
     li.appendChild(texto);
+    li.appendChild(botonEliminar);
     list.appendChild(li);
   });
 
   counter.textContent = `Elementos: ${items.length}`;
 }
+
 
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
