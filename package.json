@@ -1,0 +1,13 @@
+
+{
+  "name": "mi-laboratorio-backend",
+  "version": "1.0.0",
+  "description": "Mi primer backend con Node.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
