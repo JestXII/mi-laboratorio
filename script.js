@@ -7,29 +7,58 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_KEY
 );
 
+const authForm = document.getElementById("auth-form");
+const emailInput = document.getElementById("auth-email");
+const passwordInput = document.getElementById("auth-password");
+const registerBtn = document.getElementById("register-btn");
+const logoutBtn = document.getElementById("logout-btn");
+const authMessage = document.getElementById("auth-message");
+
 const form = document.getElementById("item-form");
 const input = document.getElementById("item-input");
 const list = document.getElementById("item-list");
 const counter = document.getElementById("counter");
 
+let currentUser = null;
 let items = [];
 
+function updateAuthUI() {
+  const loggedIn = Boolean(currentUser);
+
+  form.hidden = !loggedIn;
+  list.hidden = !loggedIn;
+  logoutBtn.hidden = !loggedIn;
+
+  if (loggedIn) {
+    authMessage.textContent =
+      "Sesión iniciada: " + currentUser.email;
+  } else {
+    authMessage.textContent =
+      "Inicia sesión para ver tus tareas.";
+    items = [];
+    renderItems();
+    counter.textContent = "Inicia sesión para continuar.";
+  }
+}
+
 async function loadItems() {
+  if (!currentUser) return;
+
   const { data, error } = await supabaseClient
     .from("tareas")
     .select("*")
+    .eq("usuario_id", currentUser.id)
     .order("id", { ascending: true });
 
   if (error) {
-    console.error("Error al cargar tareas:", error);
-    counter.textContent = "Error: " + error.message;
+    console.error(error);
+    counter.textContent = "Error al cargar tareas.";
     return;
   }
 
   items = data;
   renderItems();
 }
-
 
 function renderItems() {
   list.innerHTML = "";
@@ -50,9 +79,7 @@ function renderItems() {
         .eq("id", item.id);
 
       if (error) {
-        alert("No se pudo actualizar: " + error.message);
-        await loadItems();
-        return;
+        alert("Error al actualizar: " + error.message);
       }
 
       await loadItems();
@@ -65,18 +92,14 @@ function renderItems() {
       texto.style.textDecoration = "line-through";
     }
 
-    const botonEliminar = document.createElement("button");
-    botonEliminar.textContent = "Eliminar";
-    botonEliminar.style.marginLeft = "10px";
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Eliminar";
+    deleteBtn.style.marginLeft = "10px";
 
-    botonEliminar.addEventListener("click", async function () {
-      const confirmar = confirm(
-        `¿Seguro que quieres eliminar "${item.nombre}"?`
-      );
+    deleteBtn.addEventListener("click", async function () {
+      if (!confirm(`¿Eliminar "${item.nombre}"?`)) return;
 
-      if (!confirmar) return;
-
-      botonEliminar.disabled = true;
+      deleteBtn.disabled = true;
 
       const { error } = await supabaseClient
         .from("tareas")
@@ -84,8 +107,8 @@ function renderItems() {
         .eq("id", item.id);
 
       if (error) {
-        alert("No se pudo eliminar: " + error.message);
-        botonEliminar.disabled = false;
+        alert("Error al eliminar: " + error.message);
+        deleteBtn.disabled = false;
         return;
       }
 
@@ -94,27 +117,108 @@ function renderItems() {
 
     li.appendChild(checkbox);
     li.appendChild(texto);
-    li.appendChild(botonEliminar);
+    li.appendChild(deleteBtn);
     list.appendChild(li);
   });
 
   counter.textContent = `Elementos: ${items.length}`;
 }
 
+registerBtn.addEventListener("click", async function () {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!email || !password) {
+    authMessage.textContent = "Completa correo y contraseña.";
+    return;
+  }
+
+  registerBtn.disabled = true;
+  authMessage.textContent = "Creando cuenta...";
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email: email,
+    password: password
+  });
+
+  registerBtn.disabled = false;
+
+  if (error) {
+    authMessage.textContent = "Error: " + error.message;
+    return;
+  }
+
+  if (data.session) {
+    authMessage.textContent = "Cuenta creada correctamente.";
+  } else {
+    authMessage.textContent =
+      "Cuenta creada. Revisa tu correo para confirmarla y después inicia sesión.";
+  }
+});
+
+authForm.addEventListener("submit", async function (event) {
+  event.preventDefault();
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email: emailInput.value.trim(),
+    password: passwordInput.value
+  });
+
+  if (error) {
+    authMessage.textContent = "Error: " + error.message;
+  }
+});
+
+logoutBtn.addEventListener("click", async function () {
+  const { error } = await supabaseClient.auth.signOut();
+
+  if (error) {
+    authMessage.textContent = "Error al cerrar sesión: " + error.message;
+  }
+});
+
+supabaseClient.auth.onAuthStateChange(function (_event, session) {
+  currentUser = session ? session.user : null;
+  updateAuthUI();
+
+  if (currentUser) {
+    loadItems();
+  }
+});
+
+async function initializeApp() {
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    authMessage.textContent = "Error al recuperar la sesión.";
+    return;
+  }
+
+  currentUser = data.session ? data.session.user : null;
+  updateAuthUI();
+
+  if (currentUser) {
+    await loadItems();
+  }
+}
 
 form.addEventListener("submit", async function (event) {
   event.preventDefault();
+
+  if (!currentUser) return;
 
   const nombre = input.value.trim();
   if (!nombre) return;
 
   const { error } = await supabaseClient
     .from("tareas")
-    .insert({ nombre: nombre });
+    .insert({
+      nombre: nombre,
+      usuario_id: currentUser.id
+    });
 
   if (error) {
-    console.error("Error al guardar:", error.message);
-    alert("No se pudo guardar la tarea: " + error.message);
+    alert("Error al guardar: " + error.message);
     return;
   }
 
@@ -122,4 +226,4 @@ form.addEventListener("submit", async function (event) {
   await loadItems();
 });
 
-loadItems();
+initializeApp();
