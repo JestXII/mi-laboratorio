@@ -70,6 +70,29 @@ app.get("/api/tareas", (req, res) => {
     tareas: tareas
   });
 });
+app.patch("/api/tareas/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const tarea = tareas.find((t) => t.id === id);
+
+  if (!tarea) {
+    return res.status(404).json({
+      error: "Tarea no encontrada"
+    });
+  }
+
+  if (typeof req.body.completada !== "boolean") {
+    return res.status(400).json({
+      error: "completada debe ser true o false"
+    });
+  }
+
+  tarea.completada = req.body.completada;
+
+  res.json({
+    mensaje: "Tarea actualizada",
+    tarea: tarea
+  });
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
