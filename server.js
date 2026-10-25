@@ -3,6 +3,15 @@ const express = require("express");
 
 const app = express();
 app.use(express.json());
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  },
+  max: 3
+});
 let tareas = [];
 let siguienteId = 1;
 
