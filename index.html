@@ -8,6 +8,43 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  
+<section id="auth-section">
+  <h2>Mi cuenta</h2>
+
+  <form id="auth-form">
+    <label for="auth-email">Correo electrónico</label>
+    <input
+      id="auth-email"
+      type="email"
+      placeholder="tu@correo.com"
+      required
+    />
+
+    <label for="auth-password">Contraseña</label>
+    <input
+      id="auth-password"
+      type="password"
+      placeholder="Mínimo 6 caracteres"
+      minlength="6"
+      required
+    />
+
+    <button type="button" id="register-btn">
+      Crear cuenta
+    </button>
+
+    <button type="submit">
+      Iniciar sesión
+    </button>
+  </form>
+
+  <p id="auth-message"></p>
+  <button type="button" id="logout-btn" hidden>
+    Cerrar sesión
+  </button>
+</section>
+  
   <main class="app">
     <p class="tag">MI PRIMER PROYECTO</p>
     <h1>Mi laboratorio 🚀</h1>
