@@ -5,7 +5,7 @@ const app = express();
 
 app.get("/api/saludo", (req, res) => {
   res.json({
-    mensaje: "Hola desde mi backend",
+    mensaje: process.env.MENSAJE_PERSONALIZADO || "Hola desde mi backend",
     funciona: true
   });
 });
