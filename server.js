@@ -3,7 +3,8 @@ const express = require("express");
 
 const app = express();
 app.use(express.json());
-
+let tareas = [];
+let siguienteId = 1;
 
 app.get("/api/presentacion", (req, res) => {
   const nombre = req.query.nombre ?? "invitado";
