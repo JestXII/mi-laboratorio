@@ -4,7 +4,23 @@ const input = document.getElementById("item-input");
 const list = document.getElementById("item-list");
 const counter = document.getElementById("counter");
 
-let total = 0;
+const STORAGE_KEY = "mi-laboratorio-items";
+
+let items = JSON.parse(
+  localStorage.getItem(STORAGE_KEY) || "[]"
+);
+
+function renderItems() {
+  list.innerHTML = "";
+
+  items.forEach(function (text) {
+    const item = document.createElement("li");
+    item.textContent = text;
+    list.appendChild(item);
+  });
+
+  counter.textContent = `Elementos: ${items.length}`;
+}
 
 form.addEventListener("submit", function (event) {
   event.preventDefault();
@@ -15,14 +31,17 @@ form.addEventListener("submit", function (event) {
     return;
   }
 
-  const item = document.createElement("li");
-  item.textContent = text;
+  items.push(text);
 
-  list.appendChild(item);
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(items)
+  );
 
-  total++;
-  counter.textContent = `Elementos: ${total}`;
+  renderItems();
 
   input.value = "";
   input.focus();
 });
+
+renderItems();
