@@ -42,6 +42,28 @@ app.post("/api/saludar", (req, res) => {
     funciona: true
   });
 });
+app.post("/api/tareas", (req, res) => {
+  const nombre = req.body.nombre;
+
+  if (typeof nombre !== "string" || nombre.trim() === "") {
+    return res.status(400).json({
+      error: "Debes enviar un nombre de tarea válido"
+    });
+  }
+
+  const tarea = {
+    id: siguienteId++,
+    nombre: nombre.trim(),
+    completada: false
+  };
+
+  tareas.push(tarea);
+
+  res.status(201).json({
+    mensaje: "Tarea creada",
+    tarea: tarea
+  });
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
