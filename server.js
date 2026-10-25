@@ -9,7 +9,14 @@ app.get("/api/saludo", (req, res) => {
     funciona: true
   });
 });
+app.get("/api/presentacion", (req, res) => {
+  const nombre = req.query.nombre || "invitado";
 
+  res.json({
+    mensaje: `Hola, ${nombre}`,
+    funciona: true
+  });
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
