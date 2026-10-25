@@ -64,6 +64,12 @@ app.post("/api/tareas", (req, res) => {
     tarea: tarea
   });
 });
+app.get("/api/tareas", (req, res) => {
+  res.json({
+    total: tareas.length,
+    tareas: tareas
+  });
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
