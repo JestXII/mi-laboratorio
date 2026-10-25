@@ -11,6 +11,7 @@ const authForm = document.getElementById("auth-form");
 const emailInput = document.getElementById("auth-email");
 const passwordInput = document.getElementById("auth-password");
 const registerBtn = document.getElementById("register-btn");
+const resendEmailBtn = document.getElementById("resend-email-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const authMessage = document.getElementById("auth-message");
 
@@ -227,3 +228,32 @@ form.addEventListener("submit", async function (event) {
 });
 
 initializeApp();
+
+resendEmailBtn.addEventListener("click", async function () {
+  const email = emailInput.value.trim();
+
+  if (!email) {
+    authMessage.textContent = "Escribe tu correo primero.";
+    return;
+  }
+
+  resendEmailBtn.disabled = true;
+  authMessage.textContent = "Solicitando nuevo correo...";
+
+  const { error } = await supabaseClient.auth.resend({
+    type: "signup",
+    email: email
+  });
+
+  resendEmailBtn.disabled = false;
+
+  if (error) {
+    authMessage.textContent =
+      "No se pudo reenviar: " + error.message;
+    return;
+  }
+
+  authMessage.textContent =
+    "Solicitud enviada. Revisa tu bandeja y correo no deseado.";
+});
+
