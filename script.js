@@ -1,3 +1,4 @@
+
 const SUPABASE_URL = "https://ifsmymgczyhgcjnayplu.supabase.co";
 const SUPABASE_KEY = "sb_publishable_NTZZ29N0kWZvJZS18PVQYw_5RsMliCC";
 
@@ -34,7 +35,39 @@ function renderItems() {
 
   items.forEach(function (item) {
     const li = document.createElement("li");
-    li.textContent = item.nombre;
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = item.completada;
+    checkbox.disabled = false;
+
+    checkbox.addEventListener("change", async function () {
+      checkbox.disabled = true;
+
+      const { error } = await supabaseClient
+        .from("tareas")
+        .update({ completada: checkbox.checked })
+        .eq("id", item.id);
+
+      if (error) {
+        alert("No se pudo actualizar: " + error.message);
+        checkbox.checked = item.completada;
+        checkbox.disabled = false;
+        return;
+      }
+
+      await loadItems();
+    });
+
+    const texto = document.createElement("span");
+    texto.textContent = " " + item.nombre;
+
+    if (item.completada) {
+      texto.style.textDecoration = "line-through";
+    }
+
+    li.appendChild(checkbox);
+    li.appendChild(texto);
     list.appendChild(li);
   });
 
@@ -45,7 +78,6 @@ form.addEventListener("submit", async function (event) {
   event.preventDefault();
 
   const nombre = input.value.trim();
-
   if (!nombre) return;
 
   const { error } = await supabaseClient
