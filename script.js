@@ -289,3 +289,6 @@ async function probarMiUsuario() {
       "No se pudo conectar con el backend.";
   }
 }
+document
+  .getElementById("test-backend-btn")
+  .addEventListener("click", probarMiUsuario);
