@@ -41,6 +41,15 @@ async function verificarUsuario(req, res, next) {
   req.usuario = data.user;
   next();
 }
+
+app.get("/api/mi-usuario", verificarUsuario, (req, res) => {
+  res.json({
+    autenticado: true,
+    id: req.usuario.id,
+    email: req.usuario.email
+  });
+});
+
 // 1. Saludo personalizado
 app.get("/api/saludo", (req, res) => {
   res.json({
