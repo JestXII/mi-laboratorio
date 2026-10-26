@@ -39,7 +39,9 @@ async function verificarUsuario(req, res, next) {
   const token = authorization.slice(7);
 
   const { data, error } = await supabaseAuth.auth.getUser(token);
-
+if (error) {
+  console.error("Error verificando token:", error.message);
+}
   if (error || !data.user) {
     return res.status(401).json({
       error: "Sesión inválida o expirada"
