@@ -12,7 +12,35 @@ const pool = new Pool({
   },
   max: 3
 });
+const { createClient } = require("@supabase/supabase-js");
 
+const supabaseAuth = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
+
+async function verificarUsuario(req, res, next) {
+  const authorization = req.headers.authorization;
+
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return res.status(401).json({
+      error: "Debes iniciar sesión"
+    });
+  }
+
+  const token = authorization.slice(7);
+
+  const { data, error } = await supabaseAuth.auth.getUser(token);
+
+  if (error || !data.user) {
+    return res.status(401).json({
+      error: "Sesión inválida o expirada"
+    });
+  }
+
+  req.usuario = data.user;
+  next();
+}
 // 1. Saludo personalizado
 app.get("/api/saludo", (req, res) => {
   res.json({
