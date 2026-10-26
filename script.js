@@ -256,4 +256,36 @@ resendEmailBtn.addEventListener("click", async function () {
   authMessage.textContent =
     "Solicitud enviada. Revisa tu bandeja y correo no deseado.";
 });
+async function probarMiUsuario() {
+  const { data, error } =
+    await supabaseClient.auth.getSession();
 
+  if (error || !data.session) {
+    authMessage.textContent =
+      "Primero inicia sesión.";
+    return;
+  }
+
+  authMessage.textContent = "Probando conexión...";
+
+  try {
+    const respuesta = await fetch(
+      "https://mi-laboratorio-api.onrender.com/api/mi-usuario",
+      {
+        headers: {
+          Authorization:
+            `Bearer ${data.session.access_token}`
+        }
+      }
+    );
+
+    const resultado = await respuesta.json();
+
+    authMessage.textContent = respuesta.ok
+      ? `¡Funciona! Usuario verificado: ${resultado.email}`
+      : `Error ${respuesta.status}: ${resultado.error || "No se pudo verificar"}`;
+  } catch (error) {
+    authMessage.textContent =
+      "No se pudo conectar con el backend.";
+  }
+}
